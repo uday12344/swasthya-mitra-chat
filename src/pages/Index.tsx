@@ -80,10 +80,13 @@ const Index = () => {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
                 <Button asChild size="lg" className="text-lg px-8">
-                  <Link to="/chat" className="flex items-center gap-2">
+                  <Link to="/ai-platform" className="flex items-center gap-2">
                     <MessageSquare className="w-5 h-5" />
-                    Start Health Chat
+                    AI Health Platform
                   </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg" className="text-lg px-8">
+                  <Link to="/chat">Original Chat</Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="text-lg px-8">
                   <Link to="/dashboard">View Dashboard</Link>
@@ -157,9 +160,9 @@ const Index = () => {
             Join thousands of families already using SwasthyaAI for better health management
           </p>
           <Button asChild size="lg" variant="secondary" className="text-lg px-8">
-            <Link to="/chat" className="flex items-center gap-2">
+            <Link to="/ai-platform" className="flex items-center gap-2">
               <MessageSquare className="w-5 h-5" />
-              Start Your First Consultation
+              Start Your AI Health Journey
             </Link>
           </Button>
         </div>
