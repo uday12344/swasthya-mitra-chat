@@ -168,7 +168,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t bg-card/50 backdrop-blur-sm py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; 2024 SwasthyaAI - Multilingual Health Chatbot. Built for preventive healthcare awareness.</p>
+          <p>&copy; 2025 SwasthyaAI - Multilingual Health Chatbot. Built for preventive healthcare awareness.</p>
         </div>
       </footer>
     </div>
