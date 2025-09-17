@@ -47,6 +47,17 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        healthcare: {
+          blue: "hsl(var(--healthcare-blue))",
+          green: "hsl(var(--healthcare-green))",
+          amber: "hsl(var(--healthcare-amber))",
+        },
+        chat: {
+          bg: "hsl(var(--chat-bg))",
+          "user-bubble": "hsl(var(--user-bubble))",
+          "bot-bubble": "hsl(var(--bot-bubble))",
+          shadow: "hsl(var(--chat-shadow))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
