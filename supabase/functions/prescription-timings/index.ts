@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, symptoms } = await req.json();
+    const { imageBase64 } = await req.json();
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
     if (!GEMINI_API_KEY) {
@@ -22,49 +22,48 @@ serve(async (req) => {
       });
     }
 
-    const prompt = `Analyze this food image for someone with these symptoms: "${symptoms}".
+    const prompt = `You are a medical assistant. Extract medicine schedule from the prescription image.
 
-Provide a JSON response with:
+Strictly return JSON only with this exact shape:
 {
-  "foodName": "identified food name",
-  "recommendation": "good" | "avoid" | "moderate",
-  "nutritionalInfo": {
-    "calories": "estimated calories per serving",
-    "nutrients": ["key nutrients present"],
-    "healthBenefits": ["benefits for general health"]
-  },
-  "advice": "specific advice for the symptoms mentioned",
-  "reasoning": "why this food is good/bad for these symptoms"
+  "medicines": [
+    {
+      "name": "Medicine name with strength",
+      "dosage": "e.g., 1 tablet, 5 ml, 1 cap",
+      "frequency": "e.g., once daily, twice daily, thrice daily",
+      "timings": { "morning": true, "afternoon": false, "evening": true, "night": false },
+      "withFood": "before food | after food | with food | unspecified",
+      "duration": "e.g., 5 days, 1 week",
+      "notes": "any special notes like if fever >101, SOS, etc."
+    }
+  ],
+  "summary": "human friendly summary of the schedule"
 }
 
-Focus on Indian dietary context and Ayurvedic principles where relevant.`;
+Guidelines:
+- If handwriting is unclear, make your best clinical guess and mark uncertain notes in "notes".
+- Map typical shorthand: BD=twice daily, TDS=thrice daily, OD=once daily, HS=at night, SOS=as needed.
+- Convert dots/marks around timings into booleans for morning/afternoon/evening/night.
+- Assume adult dosing unless clearly pediatric.`;
 
-    // Determine MIME type and extract base64 payload safely
     const mimeMatch = imageBase64?.match(/^data:(image\/[^;]+);base64,/);
     const mimeType = mimeMatch?.[1] || 'image/jpeg';
     const base64Data = imageBase64?.includes(',') ? imageBase64.split(',')[1] : imageBase64;
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [
           {
             parts: [
               { text: prompt },
-              {
-                inline_data: {
-                  mime_type: mimeType,
-                  data: base64Data
-                }
-              }
+              { inline_data: { mime_type: mimeType, data: base64Data } }
             ]
           }
         ],
         generationConfig: {
-          temperature: 0.3,
+          temperature: 0.2,
           topK: 40,
           topP: 0.95,
           maxOutputTokens: 1024,
@@ -84,7 +83,7 @@ Focus on Indian dietary context and Ayurvedic principles where relevant.`;
     const data = await response.json();
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
 
-    // Normalize potential markdown/code fences and extract JSON
+    // Clean potential markdown fences
     const cleaned = rawText
       .replace(/^```json\s*/i, '')
       .replace(/^```\s*/i, '')
@@ -94,29 +93,22 @@ Focus on Indian dietary context and Ayurvedic principles where relevant.`;
     const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
     const jsonString = jsonMatch ? jsonMatch[0] : cleaned || '{}';
 
-    // Try to parse JSON response, fallback to structured response if parsing fails
-    let analysis;
+    let timings;
     try {
-      analysis = JSON.parse(jsonString);
-    } catch {
-      analysis = {
-        foodName: "Unknown Food",
-        recommendation: "moderate",
-        nutritionalInfo: {
-          calories: "Unable to determine",
-          nutrients: ["Analysis unavailable"],
-          healthBenefits: ["Consult nutritionist"]
-        },
-        advice: "Unable to analyze properly. Please consult a healthcare provider.",
-        reasoning: "Image analysis was inconclusive."
+      timings = JSON.parse(jsonString);
+    } catch (e) {
+      console.error('JSON parse failed, using fallback:', e, cleaned);
+      timings = {
+        medicines: [],
+        summary: 'Unable to confidently extract timings. Please upload a clearer photo.'
       };
     }
 
-    return new Response(JSON.stringify({ analysis }), {
+    return new Response(JSON.stringify({ timings }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error in analyze-food function:', error);
+    console.error('Error in prescription-timings function:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

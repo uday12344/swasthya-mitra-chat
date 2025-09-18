@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Pill, Clock, AlertTriangle, Shield, Package, Loader2 } from 'lucide-react';
+import { Search, Pill, Clock, AlertTriangle, Shield, Package, Loader2, Upload, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -23,10 +23,33 @@ interface MedicineInfo {
   disclaimer: string;
 }
 
+interface PrescriptionMedicine {
+  name: string;
+  dosage: string;
+  frequency: string;
+  timings: { morning: boolean; afternoon: boolean; evening: boolean; night: boolean };
+  withFood: string;
+  duration: string;
+  notes: string;
+}
+
+interface PrescriptionTimings {
+  medicines: PrescriptionMedicine[];
+  summary: string;
+}
+
 export const MedicineInfo = () => {
   const [medicineName, setMedicineName] = useState('');
   const [medicineInfo, setMedicineInfo] = useState<MedicineInfo | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Prescription upload & extraction state
+  const [prescriptionImage, setPrescriptionImage] = useState<File | null>(null);
+  const [prescriptionPreview, setPrescriptionPreview] = useState<string | null>(null);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [prescriptionResult, setPrescriptionResult] = useState<PrescriptionTimings | null>(null);
+  const prescriptionInputRef = useRef<HTMLInputElement>(null);
+
   const { toast } = useToast();
 
   const searchMedicine = async () => {
@@ -62,6 +85,60 @@ export const MedicineInfo = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handlePrescriptionSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPrescriptionImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPrescriptionPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const extractPrescriptionTimings = async () => {
+    if (!prescriptionImage) {
+      toast({
+        title: 'Missing Image',
+        description: 'Please upload a prescription image.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsExtracting(true);
+    
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const imageBase64 = e.target?.result as string;
+        
+        const { data, error } = await supabase.functions.invoke('prescription-timings', {
+          body: { imageBase64 },
+        });
+
+        if (error) throw error;
+
+        setPrescriptionResult(data.timings);
+        toast({
+          title: 'Prescription Analyzed',
+          description: 'Medicine timings have been extracted successfully.',
+        });
+      };
+      reader.readAsDataURL(prescriptionImage);
+    } catch (error) {
+      console.error('Prescription extraction error:', error);
+      toast({
+        title: 'Extraction Failed',
+        description: 'Failed to extract prescription timings. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExtracting(false);
     }
   };
 

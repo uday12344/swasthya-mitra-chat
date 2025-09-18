@@ -1,1 +1,13 @@
 project_id = "nqnlvetlxoxcizxahrpg"
+
+[functions.chat-ai]
+verify_jwt = false
+
+[functions.analyze-food]
+verify_jwt = false
+
+[functions.medicine-info]
+verify_jwt = false
+
+[functions.prescription-timings]
+verify_jwt = false
