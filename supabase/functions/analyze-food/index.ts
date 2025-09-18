@@ -39,6 +39,11 @@ Provide a JSON response with:
 
 Focus on Indian dietary context and Ayurvedic principles where relevant.`;
 
+    // Determine MIME type and extract base64 payload safely
+    const mimeMatch = imageBase64?.match(/^data:(image\/[^;]+);base64,/);
+    const mimeType = mimeMatch?.[1] || 'image/jpeg';
+    const base64Data = imageBase64?.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
@@ -51,8 +56,8 @@ Focus on Indian dietary context and Ayurvedic principles where relevant.`;
               { text: prompt },
               {
                 inline_data: {
-                  mime_type: "image/jpeg",
-                  data: imageBase64.split(',')[1] // Remove data:image/jpeg;base64, prefix
+                  mime_type: mimeType,
+                  data: base64Data
                 }
               }
             ]

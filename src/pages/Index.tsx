@@ -65,8 +65,8 @@ const Index = () => {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="text-center lg:text-left">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            <div className="text-center lg:text-left relative z-10 lg:pr-8 xl:pr-12">
               <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-healthcare-blue via-healthcare-green to-healthcare-blue bg-clip-text text-transparent">
                 SwasthyaAI
               </h1>
@@ -94,7 +94,7 @@ const Index = () => {
               </div>
             </div>
             
-            <div className="relative">
+            <div className="relative z-0 lg:pl-8 overflow-hidden">
               <img 
                 src={heroImage} 
                 alt="SwasthyaAI Healthcare Chatbot - Indian family consulting health assistant"
