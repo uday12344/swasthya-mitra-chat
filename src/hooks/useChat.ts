@@ -1,12 +1,21 @@
 import { useState, useCallback, useEffect } from "react";
 import { Language } from "@/components/LanguageSwitcher";
 import { chatResponses, vaccinationSchedule, outbreakAlerts } from "@/data/healthData";
+import { symptomQuestions, SymptomQuestion } from "@/data/symptomQuestions";
 
 export interface ChatMessage {
   id: string;
   message: string;
   isUser: boolean;
   timestamp: Date;
+  options?: {
+    id: string;
+    text: {
+      en: string;
+      hi: string;
+      te: string;
+    };
+  }[];
 }
 
 export interface UserProfile {
@@ -17,47 +26,83 @@ export interface UserProfile {
   lastVisit?: Date;
 }
 
+type SymptomState = "asking" | "finished";
+
 export const useChat = (language: Language) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile>({});
   const [isTyping, setIsTyping] = useState(false);
+  const [symptomState, setSymptomState] = useState<SymptomState>("asking");
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [symptomAnswers, setSymptomAnswers] = useState<string[]>([]);
 
-  // Load user profile from localStorage
   useEffect(() => {
     const savedProfile = localStorage.getItem("swasthya-user-profile");
     if (savedProfile) {
       setUserProfile(JSON.parse(savedProfile));
     }
-
-    // Welcome message
-    const welcomeMessage: ChatMessage = {
-      id: "welcome",
-      message: getWelcomeMessage(language),
-      isUser: false,
-      timestamp: new Date(),
-    };
-    setMessages([welcomeMessage]);
+    askSymptomQuestion(0);
   }, [language]);
 
-  // Save user profile to localStorage
+  const askSymptomQuestion = (index: number) => {
+    const question = symptomQuestions[index];
+    const questionMessage: ChatMessage = {
+      id: `sq-${index}`,
+      message: question.question[language],
+      isUser: false,
+      timestamp: new Date(),
+      options: question.options,
+    };
+    setMessages([questionMessage]);
+  };
+
   const updateUserProfile = useCallback((updates: Partial<UserProfile>) => {
     const newProfile = { ...userProfile, ...updates };
     setUserProfile(newProfile);
     localStorage.setItem("swasthya-user-profile", JSON.stringify(newProfile));
   }, [userProfile]);
 
-  const getWelcomeMessage = (lang: Language) => {
-    const messages = {
-      en: `Hello! I'm SwasthyaAI, your multilingual health assistant. I can help you with health queries, vaccination schedules, outbreak alerts, and preventive care tips. How can I assist you today?`,
-      hi: `नमस्ते! मैं SwasthyaAI हूं, आपका बहुभाषी स्वास्थ्य सहायक। मैं आपको स्वास्थ्य प्रश्न, टीकाकरण कार्यक्रम, प्रकोप अलर्ट और निवारक देखभाल युक्तियों में मदद कर सकता हूं। आज मैं आपकी कैसे सहायता कर सकता हूं?`,
-      te: `నమస్కారం! నేను SwasthyaAI, మీ బహుభాషా ఆరోగ్య సహాయకుడిని. నేను మీకు ఆరోగ్య ప్రశ్నలు, టీకా షెడ్యూల్స్, వ్యాప్తి హెచ్చరికలు మరియు నివారణ సంరక్షణ చిట్కాలతో సహాయం చేయగలను. ఈరోజు నేను మీకు ఎలా సహాయం చేయగలను?`
+  const handleSymptomAnswer = (answer: string, optionId: string) => {
+    const newAnswers = [...symptomAnswers, optionId];
+    setSymptomAnswers(newAnswers);
+
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      message: answer,
+      isUser: true,
+      timestamp: new Date(),
     };
-    return messages[lang];
+    setMessages(prev => [...prev, userMessage]);
+
+    const nextQuestionIndex = currentQuestionIndex + 1;
+    if (nextQuestionIndex < symptomQuestions.length) {
+      setCurrentQuestionIndex(nextQuestionIndex);
+      setTimeout(() => {
+        const nextQuestion = symptomQuestions[nextQuestionIndex];
+        const questionMessage: ChatMessage = {
+          id: `sq-${nextQuestionIndex}`,
+          message: nextQuestion.question[language],
+          isUser: false,
+          timestamp: new Date(),
+          options: nextQuestion.options,
+        };
+        setMessages(prev => [...prev, questionMessage]);
+      }, 500);
+    } else {
+      setSymptomState("finished");
+      const finalMessage: ChatMessage = {
+        id: "final-symptoms",
+        message: "Thank you for answering the questions. How can I help you further?",
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, finalMessage]);
+    }
   };
 
   const generateResponse = useCallback((userMessage: string, lang: Language): string => {
     const message = userMessage.toLowerCase();
-    
+
     // Check for user profile information
     if (message.includes("my name is") || message.includes("i am")) {
       const nameMatch = message.match(/(?:my name is|i am) ([a-zA-Z\s]+)/);
@@ -75,7 +120,7 @@ export const useChat = (language: Language) => {
     if (ageMatch) {
       const age = parseInt(ageMatch[1]);
       updateUserProfile({ age });
-      
+
       // Provide vaccination recommendations for children
       if (age <= 18) {
         const relevantVaccines = vaccinationSchedule.filter(v => {
@@ -83,7 +128,7 @@ export const useChat = (language: Language) => {
           if (age < 1) return v.age.includes("weeks") || v.age.includes("months");
           return v.age.includes("years") || v.age.includes("months");
         });
-        
+
         if (relevantVaccines.length > 0) {
           const vaccineList = relevantVaccines.map(v => `${v.vaccine} (${v.age})`).join(", ");
           return lang === "en" ? `Based on the age ${age}, here are important vaccinations: ${vaccineList}. Please consult your pediatrician for the complete schedule.` :
@@ -115,11 +160,15 @@ export const useChat = (language: Language) => {
       hi: "मैं स्वास्थ्य संबंधी प्रश्नों में मदद के लिए यहां हूं। आप मुझसे लक्षण, रोकथाम, टीकाकरण कार्यक्रम या प्रकोप अलर्ट के बारे में पूछ सकते हैं। मलेरिया, डेंगू, स्वस्थ आहार या टीकाकरण कार्यक्रम के बारे में पूछने का प्रयास करें।",
       te: "నేను ఆరోగ్య సంబంధిత ప్రశ్నలతో సహాయం చేయడానికి ఇక్కడ ఉన్నాను. మీరు నన్ను లక్షణాలు, నివారణ, టీకా షెడ్యూల్స్ లేదా వ్యాప్తి హెచ్చరికల గురించి అడగవచ్చు. మలేరియా, డెంగీ, ఆరోగ్యకర ఆహారం లేదా టీకా షెడ్యూల్స్ గురించి అడగడానికి ప్రయత్నించండి."
     };
-    
+
     return defaultResponses[lang];
   }, [updateUserProfile]);
 
   const sendMessage = useCallback(async (message: string) => {
+    if (symptomState === 'asking') {
+      return;
+    }
+
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       message,
@@ -143,7 +192,7 @@ export const useChat = (language: Language) => {
       setMessages(prev => [...prev, botMessage]);
       setIsTyping(false);
     }, 1000 + Math.random() * 1000);
-  }, [generateResponse, language]);
+  }, [generateResponse, language, symptomState]);
 
   return {
     messages,
@@ -151,5 +200,7 @@ export const useChat = (language: Language) => {
     isTyping,
     sendMessage,
     updateUserProfile,
+    symptomState,
+    handleSymptomAnswer,
   };
 };

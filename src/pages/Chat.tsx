@@ -14,8 +14,8 @@ const Chat = () => {
   const [language, setLanguage] = useState<Language>("en");
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
-  const { messages, userProfile, isTyping, sendMessage } = useChat(language);
+
+  const { messages, userProfile, isTyping, sendMessage, symptomState, handleSymptomAnswer } = useChat(language);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -50,7 +50,7 @@ const Chat = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button asChild variant="ghost" size="sm">
-                <Link to="/" className="flex items-center gap-2">
+                <Link to="/home" className="flex items-center gap-2">
                   <ArrowLeft className="w-4 h-4" />
                   Back
                 </Link>
@@ -62,14 +62,16 @@ const Chat = () => {
                 <div>
                   <h1 className="font-semibold">SwasthyaAI</h1>
                   <p className="text-xs text-muted-foreground">
-                    {userProfile.name ? `Hello, ${userProfile.name}` : "Health Assistant"}
+                    {userProfile.name
+                      ? `Hello, ${userProfile.name}`
+                      : "Health Assistant"}
                   </p>
                 </div>
               </div>
             </div>
-            
-            <LanguageSwitcher 
-              currentLanguage={language} 
+
+            <LanguageSwitcher
+              currentLanguage={language}
               onLanguageChange={setLanguage}
             />
           </div>
@@ -82,7 +84,9 @@ const Chat = () => {
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-destructive" />
             <div>
-              <p className="text-sm font-medium text-destructive">Health Alert</p>
+              <p className="text-sm font-medium text-destructive">
+                Health Alert
+              </p>
               <p className="text-xs text-muted-foreground">
                 {activeAlert.description}
               </p>
@@ -101,9 +105,12 @@ const Chat = () => {
                 message={message.message}
                 isUser={message.isUser}
                 timestamp={message.timestamp}
+                options={message.options}
+                onOptionClick={handleSymptomAnswer}
+                language={language}
               />
             ))}
-            
+
             {/* Typing indicator */}
             {isTyping && (
               <div className="flex gap-3 mb-4 animate-pulse">
@@ -113,13 +120,19 @@ const Chat = () => {
                 <div className="bg-chat-bot-bubble rounded-2xl rounded-bl-md px-4 py-3 border border-border">
                   <div className="flex gap-1">
                     <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div
+                      className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
                   </div>
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
         </div>
@@ -128,39 +141,47 @@ const Chat = () => {
       {/* Quick Replies and Input */}
       <div className="bg-card/90 backdrop-blur-sm border-t p-4">
         <div className="max-w-4xl mx-auto">
-          <QuickReplies 
-            language={language} 
-            onQuickReply={handleSendMessage}
-            className="mb-4"
-          />
-          
-          <div className="flex gap-2">
-            <Input
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder={
-                language === "en" ? "Type your health question..." :
-                language === "hi" ? "अपना स्वास्थ्य प्रश्न टाइप करें..." :
-                "మీ ఆరోగ్య ప్రశ్నను టైప్ చేయండి..."
-              }
-              className="flex-1"
-              disabled={isTyping}
-            />
-            <Button 
-              onClick={() => handleSendMessage()}
-              disabled={!inputMessage.trim() || isTyping}
-              size="icon"
-              className="transition-all duration-200 hover:scale-105"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-          
+          {symptomState === "finished" && (
+            <>
+              <QuickReplies
+                language={language}
+                onQuickReply={handleSendMessage}
+                className="mb-4"
+              />
+
+              <div className="flex gap-2">
+                <Input
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder={
+                    language === "en"
+                      ? "Type your health question..."
+                      : language === "hi"
+                      ? "अपना स्वास्थ्य प्रश्न टाइप करें..."
+                      : "మీ ఆరోగ్య ప్రశ్నను టైప్ చేయండి..."
+                  }
+                  className="flex-1"
+                  disabled={isTyping}
+                />
+                <Button
+                  onClick={() => handleSendMessage()}
+                  disabled={!inputMessage.trim() || isTyping}
+                  size="icon"
+                  className="transition-all duration-200 hover:scale-105"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </>
+          )}
+
           <p className="text-xs text-muted-foreground text-center mt-2">
-            {language === "en" ? "SwasthyaAI can make mistakes. Please verify important medical information." :
-             language === "hi" ? "SwasthyaAI गलतियां कर सकता है। कृपया महत्वपूर्ण चिकित्सा जानकारी सत्यापित करें।" :
-             "SwasthyaAI తప్పులు చేయవచ్చు. దయచేసి ముఖ్యమైన వైద్య సమాచారాన్ని ధృవీకరించండి."}
+            {language === "en"
+              ? "SwasthyaAI can make mistakes. Please verify important medical information."
+              : language === "hi"
+              ? "SwasthyaAI गलतियां कर सकता है। कृपया महत्वपूर्ण चिकित्सा जानकारी सत्यापित करें।"
+              : "SwasthyaAI తప్పులు చేయవచ్చు. దయచేసి ముఖ్యమైన వైద్య సమాచారాన్ని ధృవీకరించండి."}
           </p>
         </div>
       </div>
