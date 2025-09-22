@@ -8,6 +8,7 @@ import Chat from "./pages/Chat";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import { AIHealthPlatform } from "./components/AIHealthPlatform";
+import { LoginPage } from "./pages/LoginPage";
 
 const queryClient = new QueryClient();
 
@@ -18,10 +19,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<LoginPage />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/ai-platform" element={<AIHealthPlatform />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/home" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
