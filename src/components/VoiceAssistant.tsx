@@ -115,13 +115,32 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ language = 'en' 
   }, [language]);
 
   const startListening = useCallback(() => {
-    if (recognition.current && !isListening) {
+    if (!recognition.current) {
+      toast({
+        title: "Voice Recognition Not Supported",
+        description: "Your browser doesn't support voice recognition. Please try a different browser.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!isListening) {
       setTranscript('');
       setResponse('');
       setIsListening(true);
-      recognition.current.start();
+      try {
+        recognition.current.start();
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+        setIsListening(false);
+        toast({
+          title: "Voice Recognition Error",
+          description: "Could not start voice recognition. Please check your microphone permissions.",
+          variant: "destructive",
+        });
+      }
     }
-  }, [isListening]);
+  }, [isListening, toast]);
 
   const stopListening = useCallback(() => {
     if (recognition.current && isListening) {

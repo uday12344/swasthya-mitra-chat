@@ -78,7 +78,7 @@ const Index = () => {
                 vaccination reminders, and disease prevention tips in English, Hindi, and Telugu.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12 lg:mr-12 xl:mr-16 lg:max-w-[560px]">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12 lg:mr-20 xl:mr-24 lg:max-w-[500px]">
                 <Button asChild size="lg" className="text-lg px-8">
                   <Link to="/ai-platform" className="flex items-center gap-2">
                     <MessageSquare className="w-5 h-5" />
