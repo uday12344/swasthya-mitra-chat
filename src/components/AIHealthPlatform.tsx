@@ -3,7 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChatBot } from './chatbot/ChatBot';
 import { FoodAnalysis } from './food/FoodAnalysis';
 import { MedicineInfo } from './medicine/MedicineInfo';
-import { Bot, Apple, Pill } from 'lucide-react';
+import { VoiceAssistant } from './VoiceAssistant';
+import { Bot, Apple, Pill, Mic } from 'lucide-react';
 
 export const AIHealthPlatform = () => {
   const [activeTab, setActiveTab] = useState('chat');
@@ -21,10 +22,14 @@ export const AIHealthPlatform = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="chat" className="flex items-center gap-2">
               <Bot className="w-4 h-4" />
               AI Chatbot
+            </TabsTrigger>
+            <TabsTrigger value="voice" className="flex items-center gap-2">
+              <Mic className="w-4 h-4" />
+              Voice Assistant
             </TabsTrigger>
             <TabsTrigger value="food" className="flex items-center gap-2">
               <Apple className="w-4 h-4" />
@@ -38,6 +43,10 @@ export const AIHealthPlatform = () => {
 
           <TabsContent value="chat" className="mt-0">
             <ChatBot />
+          </TabsContent>
+
+          <TabsContent value="voice" className="mt-0">
+            <VoiceAssistant />
           </TabsContent>
 
           <TabsContent value="food" className="mt-0">
