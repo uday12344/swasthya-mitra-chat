@@ -1,20 +1,30 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LanguageSwitcher, Language } from "@/components/LanguageSwitcher";
-import { vaccinationSchedule, outbreakAlerts, diseaseInfo } from "@/data/healthData";
-import { 
-  Calendar, 
-  AlertTriangle, 
-  BookOpen, 
-  Users, 
+import {
+  vaccinationSchedule,
+  outbreakAlerts,
+  diseaseInfo,
+} from "@/data/healthData";
+import {
+  Calendar,
+  AlertTriangle,
+  BookOpen,
+  Users,
   TrendingUp,
   ArrowLeft,
   Syringe,
   MapPin,
-  Shield
+  Shield,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -23,10 +33,14 @@ const Dashboard = () => {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case "high": return "destructive";
-      case "medium": return "default";
-      case "low": return "secondary";
-      default: return "default";
+      case "high":
+        return "destructive";
+      case "medium":
+        return "default";
+      case "low":
+        return "secondary";
+      default:
+        return "default";
     }
   };
 
@@ -36,7 +50,7 @@ const Dashboard = () => {
         dashboard: "Health Dashboard",
         overview: "Overview",
         vaccinations: "Vaccinations",
-        outbreaks: "Outbreaks", 
+        outbreaks: "Outbreaks",
         education: "Education",
         activeAlerts: "Active Health Alerts",
         vaccinationSchedule: "Vaccination Schedule",
@@ -47,7 +61,7 @@ const Dashboard = () => {
         totalVaccines: "Total Vaccines",
         activeOutbreaks: "Active Outbreaks",
         healthTopics: "Health Topics",
-        severity: "Severity"
+        severity: "Severity",
       },
       hi: {
         dashboard: "स्वास्थ्य डैशबोर्ड",
@@ -64,7 +78,7 @@ const Dashboard = () => {
         totalVaccines: "कुल टीके",
         activeOutbreaks: "सक्रिय प्रकोप",
         healthTopics: "स्वास्थ्य विषय",
-        severity: "गंभीरता"
+        severity: "गंभीरता",
       },
       te: {
         dashboard: "ఆరోగ్య డాష్‌బోర్డ్",
@@ -81,8 +95,8 @@ const Dashboard = () => {
         totalVaccines: "మొత్తం టీకాలు",
         activeOutbreaks: "క్రియాశీల వ్యాప్తులు",
         healthTopics: "ఆరోగ్య విషయాలు",
-        severity: "తీవ్రత"
-      }
+        severity: "తీవ్రత",
+      },
     };
     return translations[language][key] || key;
   };
@@ -95,17 +109,19 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button asChild variant="ghost" size="sm">
-                <Link to="/" className="flex items-center gap-2">
+                <Link to="/home" className="flex items-center gap-2">
                   <ArrowLeft className="w-4 h-4" />
                   Back
                 </Link>
               </Button>
-              <h1 className="text-xl font-bold">{getTranslation("dashboard")}</h1>
+              <h1 className="text-xl font-bold">
+                {getTranslation("dashboard")}
+              </h1>
             </div>
-            
+
             <div className="flex items-center gap-4">
-              <LanguageSwitcher 
-                currentLanguage={language} 
+              <LanguageSwitcher
+                currentLanguage={language}
                 onLanguageChange={setLanguage}
               />
               <Button asChild>
@@ -123,7 +139,10 @@ const Dashboard = () => {
               <TrendingUp className="w-4 h-4" />
               {getTranslation("overview")}
             </TabsTrigger>
-            <TabsTrigger value="vaccinations" className="flex items-center gap-2">
+            <TabsTrigger
+              value="vaccinations"
+              className="flex items-center gap-2"
+            >
               <Syringe className="w-4 h-4" />
               {getTranslation("vaccinations")}
             </TabsTrigger>
@@ -142,31 +161,43 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="bg-gradient-to-br from-healthcare-blue/10 to-healthcare-blue/5 border-healthcare-blue/20">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{getTranslation("totalVaccines")}</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    {getTranslation("totalVaccines")}
+                  </CardTitle>
                   <Syringe className="h-4 w-4 text-healthcare-blue" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-healthcare-blue">{vaccinationSchedule.length}</div>
+                  <div className="text-2xl font-bold text-healthcare-blue">
+                    {vaccinationSchedule.length}
+                  </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{getTranslation("activeOutbreaks")}</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    {getTranslation("activeOutbreaks")}
+                  </CardTitle>
                   <AlertTriangle className="h-4 w-4 text-destructive" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-destructive">{outbreakAlerts.length}</div>
+                  <div className="text-2xl font-bold text-destructive">
+                    {outbreakAlerts.length}
+                  </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-gradient-to-br from-healthcare-green/10 to-healthcare-green/5 border-healthcare-green/20">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{getTranslation("healthTopics")}</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    {getTranslation("healthTopics")}
+                  </CardTitle>
                   <BookOpen className="h-4 w-4 text-healthcare-green" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-healthcare-green">{diseaseInfo.length}</div>
+                  <div className="text-2xl font-bold text-healthcare-green">
+                    {diseaseInfo.length}
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -181,7 +212,10 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {outbreakAlerts.slice(0, 3).map((alert, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 border rounded-lg bg-card/50">
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 p-3 border rounded-lg bg-card/50"
+                  >
                     <MapPin className="w-5 h-5 text-muted-foreground mt-0.5" />
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
@@ -190,7 +224,9 @@ const Dashboard = () => {
                           {alert.severity}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-1">{alert.location}</p>
+                      <p className="text-sm text-muted-foreground mb-1">
+                        {alert.location}
+                      </p>
                       <p className="text-sm">{alert.description}</p>
                     </div>
                   </div>
@@ -204,18 +240,25 @@ const Dashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle>{getTranslation("vaccinationSchedule")}</CardTitle>
-                <CardDescription>Complete vaccination schedule for children</CardDescription>
+                <CardDescription>
+                  Complete vaccination schedule for children
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4">
                   {vaccinationSchedule.map((vaccine, index) => (
-                    <div key={index} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div
+                      key={index}
+                      className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
                       <div className="w-12 h-12 bg-healthcare-blue/10 rounded-full flex items-center justify-center">
                         <Syringe className="w-6 h-6 text-healthcare-blue" />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-medium">{vaccine.vaccine}</h3>
-                        <p className="text-sm text-muted-foreground">{vaccine.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {vaccine.description}
+                        </p>
                       </div>
                       <Badge variant="outline">{vaccine.age}</Badge>
                     </div>
@@ -263,26 +306,38 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <h4 className="font-medium text-destructive mb-2">{getTranslation("symptoms")}:</h4>
+                      <h4 className="font-medium text-destructive mb-2">
+                        {getTranslation("symptoms")}:
+                      </h4>
                       <div className="flex flex-wrap gap-2">
                         {disease.symptoms.map((symptom, idx) => (
-                          <Badge key={idx} variant="destructive">{symptom}</Badge>
+                          <Badge key={idx} variant="destructive">
+                            {symptom}
+                          </Badge>
                         ))}
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h4 className="font-medium text-healthcare-green mb-2">{getTranslation("prevention")}:</h4>
+                      <h4 className="font-medium text-healthcare-green mb-2">
+                        {getTranslation("prevention")}:
+                      </h4>
                       <div className="flex flex-wrap gap-2">
                         {disease.prevention.map((tip, idx) => (
-                          <Badge key={idx} variant="secondary">{tip}</Badge>
+                          <Badge key={idx} variant="secondary">
+                            {tip}
+                          </Badge>
                         ))}
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h4 className="font-medium text-healthcare-blue mb-2">{getTranslation("treatment")}:</h4>
-                      <p className="text-sm bg-muted p-3 rounded-lg">{disease.treatment}</p>
+                      <h4 className="font-medium text-healthcare-blue mb-2">
+                        {getTranslation("treatment")}:
+                      </h4>
+                      <p className="text-sm bg-muted p-3 rounded-lg">
+                        {disease.treatment}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
